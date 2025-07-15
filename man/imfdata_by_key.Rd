@@ -7,15 +7,13 @@
 imfdata_by_key(dataset, key, needs_auth = FALSE, needs_labels = FALSE)
 }
 \arguments{
-\item{dataset}{Dataset code (e.g., "BOP_SI")}
+\item{dataset}{Dataset code (e.g., "IMF.STA:CPI")}
 
 \item{key}{List or string specifying country/series and frequency}
 
 \item{needs_auth}{Logical: whether to obtain an Azure OAuth token}
 
 \item{needs_labels}{Logical: whether to include labels (TRUE) or raw codes (FALSE)}
-
-\item{department}{IMF department code (e.g., "BOP")}
 }
 \value{
 A cleaned data.frame with standardized TIME_PERIOD and numeric value columns

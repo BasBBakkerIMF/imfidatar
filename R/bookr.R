@@ -410,7 +410,7 @@ plot_line_chart <- function(input_data,
 #'
 #' Creates a [ggplot2] bar chart with IMF stylings. Takes in at minimum a
 #' data.frame or similar and column names for x and y.
-#' See also [bookr::plot_line_chart()] and [bookr::plot_scatter_chart()].
+#' See also [imf.bookr::plot_line_chart()] and [imf.bookr::plot_scatter_chart()].
 #' Wrapper function for [ggpubr::ggbarplot()], which is a wrapper for [ggplot2].
 #'
 #' @inheritParams plot_line_chart
