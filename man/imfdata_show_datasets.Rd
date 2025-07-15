@@ -2,16 +2,16 @@
 % Please edit documentation in R/02-idata_retrieval.r
 \name{imfdata_show_datasets}
 \alias{imfdata_show_datasets}
-\title{List available IMF datasets (dataflows)}
+\title{Show available IMF dataflows (with optional B2C auth)}
 \usage{
 imfdata_show_datasets(needs_auth = FALSE)
 }
 \arguments{
-\item{needs_auth}{Logical: whether to include auth headers}
+\item{needs_auth}{Logical(1). Whether to add an OAuth token header.}
 }
 \value{
-A data.frame of dataflow metadata
+A data.frame of available dataflows.
 }
 \description{
-List available IMF datasets (dataflows)
+Show available IMF dataflows (with optional B2C auth)
 }

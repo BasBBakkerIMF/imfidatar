@@ -2,14 +2,16 @@
 % Please edit documentation in R/01-idata_metadata.r
 \name{get_dimension_values}
 \alias{get_dimension_values}
-\title{Get codes and labels for a specific dimension in a DSD}
+\title{Get codes and labels for a specific dimension in a DSD or IMF dataflow string}
 \usage{
-get_dimension_values(dataset, dimension_id, language = "en")
+get_dimension_values(dataset_or_db, dimension_id, language = "en")
 }
 \arguments{
-\item{dataset}{Character(1). IMF dataset identifier (e.g., "DSD_BOP_SI").}
+\item{dataset_or_db}{Character(1). Either an IMF dataset identifier
+(e.g. "DSD_BOP_SI") or a dataflow string (e.g. "IMF.STA:CPI").}
 
-\item{dimension_id}{Character(1). The dimension identifier to retrieve (e.g., "COUNTRY").}
+\item{dimension_id}{Character(1). The dimension identifier to retrieve
+(e.g. "COUNTRY").}
 
 \item{language}{Character(1). Language code for labels (default: "en").}
 }
@@ -17,5 +19,5 @@ get_dimension_values(dataset, dimension_id, language = "en")
 A tibble with row names as codes and a column \code{Label} with labels.
 }
 \description{
-Extracts all code-label pairs for the specified dimension from the dataset's DSD.
+Extracts all code–label pairs for the specified dimension from the dataset's DSD.
 }

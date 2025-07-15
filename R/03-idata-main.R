@@ -7,7 +7,8 @@ idata <- list(
   metadata = list(
     imfdata_show_datasets = imfdata_show_datasets,
     get_dimension_names = get_dimension_names,
-    get_dimension_env = get_dimension_env
+    make_dimension_env = make_dimension_env,
+    make_dataset_env=make_dataset_env
   ),
   helpers = list(
     make_key_str = make_key_str

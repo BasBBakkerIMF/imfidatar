@@ -5,7 +5,6 @@
 \title{Fetch data for multiple countries and series via imfdata_by_key}
 \usage{
 imfdata_by_countries_and_series(
-  department,
   dataset,
   countries = NULL,
   series = NULL,
@@ -15,8 +14,6 @@ imfdata_by_countries_and_series(
 )
 }
 \arguments{
-\item{department}{IMF department code (e.g., "BOP")}
-
 \item{dataset}{Dataset code (e.g., "BOP_SI")}
 
 \item{countries}{Character vector of country codes (NULL for all)}
@@ -28,6 +25,8 @@ imfdata_by_countries_and_series(
 \item{needs_auth}{Logical: include authentication header?}
 
 \item{needs_labels}{Logical: include labels in output?}
+
+\item{department}{IMF department code (e.g., "BOP")}
 }
 \value{
 A cleaned data.frame
