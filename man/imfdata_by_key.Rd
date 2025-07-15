@@ -4,17 +4,9 @@
 \alias{imfdata_by_key}
 \title{Fetch data from IMF Data API via rsdmx, with optional authentication and label resolution.}
 \usage{
-imfdata_by_key(
-  department,
-  dataset,
-  key,
-  needs_auth = FALSE,
-  needs_labels = FALSE
-)
+imfdata_by_key(dataset, key, needs_auth = FALSE, needs_labels = FALSE)
 }
 \arguments{
-\item{department}{IMF department code (e.g., "BOP")}
-
 \item{dataset}{Dataset code (e.g., "BOP_SI")}
 
 \item{key}{List or string specifying country/series and frequency}
@@ -22,6 +14,8 @@ imfdata_by_key(
 \item{needs_auth}{Logical: whether to obtain an Azure OAuth token}
 
 \item{needs_labels}{Logical: whether to include labels (TRUE) or raw codes (FALSE)}
+
+\item{department}{IMF department code (e.g., "BOP")}
 }
 \value{
 A cleaned data.frame with standardized TIME_PERIOD and numeric value columns

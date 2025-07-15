@@ -37,37 +37,68 @@ NULL
   dsd
 }
 
-#' Get dimension names from a DSD
+#' Get dimension names from a DSD or IMF dataflow string
 #'
-#' Retrieves the list of dimension identifiers defined in the DSD for the given dataset.
-#'
-#' @param dataset Character(1). IMF dataset identifier (e.g., "DSD_BOP_SI").
+#' @param dataset_or_db Character(1). Either an IMF dataset identifier
+#'   (e.g. "DSD_BOP_SI") or a dataflow string (e.g. "IMF.STA:CPI").
 #' @return A data.frame with a single column `Dimension` listing dimension names.
 #' @importFrom methods slot
-#
-get_dimension_names <- function(dataset) {
-  dsd <- .get_raw_dsd(dataset)
-  ds  <- slot(dsd, "datastructures")@datastructures[[1]]
-  dims <- slot(ds, "Components")@Dimensions
-  data.frame(
+#' @importFrom stringr str_split
+#' @export
+get_dimension_names <- function(dataset_or_db) {
+  # If the input contains a ":", treat it as a dataflow and extract the code part
+  if (grepl(":", dataset_or_db)) {
+    parts  <- stringr::str_split(dataset_or_db, ":", simplify = TRUE)
+    raw    <- parts[2]
+    dsd_id <- if (grepl("^DSD_", raw)) raw else paste0("DSD_", raw)
+  } else {
+    dsd_id <- dataset_or_db
+  }
+
+  #print(dsd_id)
+  # Fetch (or cached) the raw DSD
+  dsd <- .get_raw_dsd(dsd_id)
+
+  # Extract the dimensions
+  ds   <- slot(dsd, "datastructures")@datastructures[[1]]
+  dims <- slot(ds,    "Components")@Dimensions
+
+  # Return as data.frame
+  df<-data.frame(
     Dimension = vapply(dims, function(x) slot(x, "conceptRef"), FUN.VALUE = ""),
     stringsAsFactors = FALSE
   )
+  print(df)
+  return(df)
 }
-
-#' Get codes and labels for a specific dimension in a DSD
+#' Get codes and labels for a specific dimension in a DSD or IMF dataflow string
 #'
-#' Extracts all code-label pairs for the specified dimension from the dataset's DSD.
+#' Extracts all code–label pairs for the specified dimension from the dataset's DSD.
 #'
-#' @param dataset Character(1). IMF dataset identifier (e.g., "DSD_BOP_SI").
-#' @param dimension_id Character(1). The dimension identifier to retrieve (e.g., "COUNTRY").
-#' @param language Character(1). Language code for labels (default: "en").
+#' @param dataset_or_db Character(1). Either an IMF dataset identifier
+#'   (e.g. "DSD_BOP_SI") or a dataflow string (e.g. "IMF.STA:CPI").
+#' @param dimension_id  Character(1). The dimension identifier to retrieve
+#'                      (e.g. "COUNTRY").
+#' @param language      Character(1). Language code for labels (default: "en").
 #' @return A tibble with row names as codes and a column `Label` with labels.
 #' @importFrom tibble tibble column_to_rownames
 #' @importFrom methods slot
+#' @importFrom stringr str_split
 #' @export
-get_dimension_values <- function(dataset, dimension_id, language = "en") {
-  dsd <- .get_raw_dsd(dataset)
+get_dimension_values <- function(dataset_or_db, dimension_id, language = "en") {
+  # normalize to a DSD ID
+  if (grepl(":", dataset_or_db)) {
+    parts  <- stringr::str_split(dataset_or_db, ":", simplify = TRUE)
+    raw    <- parts[2]
+    dsd_id <- if (grepl("^DSD_", raw)) raw else paste0("DSD_", raw)
+  } else {
+    dsd_id <- dataset_or_db
+  }
+
+  # fetch the DSD object (cached if available)
+  dsd <- .get_raw_dsd(dsd_id)
+
+  # pull all codelists and find the one matching our dimension
   all_codelists <- slot(dsd, "codelists")@codelists
   cl_list <- Filter(
     function(cl) endsWith(slot(cl, "id"), dimension_id),
@@ -77,6 +108,8 @@ get_dimension_values <- function(dataset, dimension_id, language = "en") {
     stop("No codelist found for dimension: ", dimension_id)
   }
   cl <- cl_list[[1]]
+
+  # extract codes and labels
   codes_all <- slot(cl, "Code")
   df <- tibble::tibble(
     Code  = vapply(codes_all, function(cd) slot(cd, "id"), FUN.VALUE = ""),
@@ -91,32 +124,43 @@ get_dimension_values <- function(dataset, dimension_id, language = "en") {
       }
     }, FUN.VALUE = "")
   )
-  df <- tibble::column_to_rownames(df, var = "Code")
-  df
+
+  # set codes as row names
+  tibble::column_to_rownames(df, var = "Code")
 }
 
 #' Create an environment mapping dimension labels to codes
 #'
-#' @param db        Full SDMX dataflow string, e.g. "IMF.STA:CPI"
-#' @param dimension Dimension name, e.g. "TYPE_OF_TRANSFORMATION"
+#' @param dataset_or_db  Character(1). Either an IMF dataflow string
+#'                       (e.g. "IMF.STA:CPI") or a DSD ID
+#'                       (e.g. "DSD_BOP_SI").
+#' @param dimension      Character(1). Dimension name,
+#'                       e.g. "TYPE_OF_TRANSFORMATION".
 #' @return Environment: names = labels, values = codes
 #' @importFrom stringr str_split
 #' @export
-get_dimension_env <- function(db, dimension) {
-  parts  <- stringr::str_split(db, ":", simplify = TRUE)
-  raw    <- parts[2]
-  # if the string doesn’t already start with "DSD_", add it:
-  dsd_id <- if (grepl("^DSD_", raw)) raw else paste0("DSD_", raw)
+make_dimension_env <- function(dataset_or_db, dimension) {
+  # normalize to a DSD ID
+  if (grepl(":", dataset_or_db)) {
+    parts  <- stringr::str_split(dataset_or_db, ":", simplify = TRUE)
+    raw    <- parts[2]
+    dsd_id <- if (grepl("^DSD_", raw)) raw else paste0("DSD_", raw)
+  } else {
+    dsd_id <- dataset_or_db
+  }
 
+  # reuse the updated get_dimension_values(), which accepts both forms:
   df <- get_dimension_values(dsd_id, dimension)
+
+  # rename the label column and capture codes
   colnames(df) <- dimension
   df$code      <- rownames(df)
 
-  vals <- as.list(df$code)
-  names(vals) <- df[[dimension]]
-
-  env <- new.env(parent = emptyenv())
+  # build the named list and then an env
+  vals <- setNames(as.list(df$code), df[[dimension]])
+  env  <- new.env(parent = emptyenv())
   list2env(vals, envir = env)
   env
 }
+
 
