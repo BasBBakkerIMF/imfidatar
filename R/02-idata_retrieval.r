@@ -196,7 +196,6 @@ make_dataset_env <- function(needs_auth=F) {
 #' @param needs_auth Logical(1). Whether to add an OAuth token header.
 #' @return A data.frame of available dataflows.
 #' @importFrom AzureAuth get_azure_token
-#' @export
 imfdata_show_datasets <- local({
   # private cache for tokens
   cache_env <- new.env(parent = emptyenv())

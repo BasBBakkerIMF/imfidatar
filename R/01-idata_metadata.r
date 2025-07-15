@@ -44,7 +44,7 @@ NULL
 #' @return A data.frame with a single column `Dimension` listing dimension names.
 #' @importFrom methods slot
 #' @importFrom stringr str_split
-#' @export
+
 get_dimension_names <- function(dataset_or_db) {
   # If the input contains a ":", treat it as a dataflow and extract the code part
   if (grepl(":", dataset_or_db)) {
@@ -84,7 +84,6 @@ get_dimension_names <- function(dataset_or_db) {
 #' @importFrom tibble tibble column_to_rownames
 #' @importFrom methods slot
 #' @importFrom stringr str_split
-#' @export
 get_dimension_values <- function(dataset_or_db, dimension_id, language = "en") {
   # normalize to a DSD ID
   if (grepl(":", dataset_or_db)) {
@@ -138,7 +137,6 @@ get_dimension_values <- function(dataset_or_db, dimension_id, language = "en") {
 #'                       e.g. "TYPE_OF_TRANSFORMATION".
 #' @return Environment: names = labels, values = codes
 #' @importFrom stringr str_split
-#' @export
 make_dimension_env <- function(dataset_or_db, dimension) {
   # normalize to a DSD ID
   if (grepl(":", dataset_or_db)) {
