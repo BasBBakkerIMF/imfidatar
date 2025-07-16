@@ -238,7 +238,8 @@ imfdata_show_datasets <- local({
     } else {
       headers <- c(`User-Agent` = "idata-script-client")
     }
-
+    # fetch dataflow metadata
+    #print(headers)
     url <- "https://api.imf.org/external/sdmx/2.1/dataflow?references=none&detail=allstubs"
     df  <- rsdmx::readSDMX(url, headers = headers)
     as.data.frame(df)

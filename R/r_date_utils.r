@@ -8,15 +8,22 @@
 #' @return Date. Last day of the specified month.
 #' @importFrom lubridate ymd ceiling_date days
 #' @noRd
+library(lubridate)
+
 yearMonthToDate <- function(month_string) {
-  if (is.null(month_string) || nchar(month_string) < 7) {
-    stop("Invalid month string format: must be at least 'YYYY-MM'")
+  # check format
+  if (any(!grepl("^\\d{4}-M\\d{2}$", month_string))) {
+    stop("Invalid month string format: must be 'YYYY-MMM', e.g. '1955-M01'")
   }
-  year  <- as.numeric(substr(month_string, 1, 4))
-  month <- as.numeric(substr(month_string, 6, 7))
-  # compute last day of that month
-  ceiling_date(ymd(paste0(year, "-", sprintf("%02d", month), "-01")), "month") - days(1)
+  # replace "-M" with "-" so we get "YYYY-MM"
+  ym_clean <- sub("-M", "-", month_string)
+  # parse first-of-month dates
+  first_of_month <- ymd(paste0(ym_clean, "-01"))
+  # ceiling to next month, then back one day
+  last_of_month <- ceiling_date(first_of_month, "month") - days(1)
+  return(last_of_month)
 }
+
 
 #' Convert a "YYYY-Q" string to the last date of that quarter
 #'
@@ -25,17 +32,40 @@ yearMonthToDate <- function(month_string) {
 #' @importFrom lubridate ymd ceiling_date days
 #' @noRd
 yearQuarterToDate <- function(quarter_string) {
-  if (is.null(quarter_string) || nchar(quarter_string) < 6) {
-    stop("Invalid quarter string format: must be at least 'YYYY-Q'")
+  # must be a character vector, no NAs
+  if (!is.character(quarter_string)) {
+    stop("`quarter_string` must be a character vector, e.g. c(\"1995-Q1\",\"2000-Q4\").")
   }
-  year    <- as.numeric(substr(quarter_string, 1, 4))
-  quarter <- as.numeric(substr(quarter_string, 6, 6))
-  if (!quarter %in% 1:4) {
-    stop("Invalid quarter: must be 1, 2, 3, or 4")
+  if (any(is.na(quarter_string))) {
+    stop("`quarter_string` contains NA; please remove or impute missing quarters.")
   }
-  last_month <- quarter * 3
-  ceiling_date(ymd(paste0(year, "-", sprintf("%02d", last_month), "-01")), "month") - days(1)
+
+  # strict regex: 4 digits, “-Q”, then 1–4
+  valid <- grepl("^\\d{4}-Q[1-4]$", quarter_string)
+  if (any(!valid)) {
+    stop(
+      "Invalid format at positions: ",
+      paste(which(!valid), collapse = ", "),
+      ".\nEach element must look like “YYYY-Qn”, e.g. “2025-Q2”."
+    )
+  }
+
+  # extract year and quarter (note: quarter digit is at position 7)
+  years    <- as.integer(substr(quarter_string, 1, 4))
+  quarters <- as.integer(substr(quarter_string, 7, 7))
+
+  # last month of each quarter
+  last_month <- quarters * 3
+
+  # first day of that last month
+  first_of_last <- ymd(paste0(years, "-", sprintf("%02d", last_month), "-01"))
+
+  # roll forward to first of next month, then step back one day
+  last_of_quarter <- ceiling_date(first_of_last, "month") - days(1)
+
+  return(last_of_quarter)
 }
+
 
 #' Process TIME_PERIOD column into date or numeric values
 #'
