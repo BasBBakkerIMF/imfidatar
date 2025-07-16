@@ -6,7 +6,7 @@
 \alias{imfidata-package}
 \title{imfidata: Fetches IMF iData}
 \description{
-What the package does (one paragraph).
+Fetches data from the IMF iData API. The package provides functions to retrieve data and metadata from the IMF iData service.
 }
 \seealso{
 Useful links:
