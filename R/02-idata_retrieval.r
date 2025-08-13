@@ -40,37 +40,24 @@ imfdata_by_key <- local({
   # the actual function
   function(dataset, key,
            needs_auth = FALSE, needs_labels = FALSE) {
-    # 1) Prepare headers
     if (needs_auth) {
-
-   print("needs auth")
-      token_creds <- cache_env$token$credentials
-      exp_time    <- if (is.numeric(token_creds$expires_on)) {
-        as.POSIXct(token_creds$expires_on, origin="1970-01-01", tz="UTC")
-      } else if (inherits(token_creds$expires_on, "POSIXct")) {
-        token_creds$expires_on
-      } else {
-        as.POSIXct(token_creds$expires_on, tz="UTC")
+      ensure_token <- function() {
+        # create token if missing OR refresh if expired
+        if (!exists("token", envir = cache_env, inherits = FALSE)) {
+          cache_env$token <- get_new_token()
+        } else {
+          creds <- cache_env$token$credentials
+          exp <- if (is.numeric(creds$expires_on)) {
+            as.POSIXct(creds$expires_on, origin = "1970-01-01", tz = "UTC")
+          } else {
+            as.POSIXct(creds$expires_on, tz = "UTC")
+          }
+          if (is.na(exp) || Sys.time() >= exp) cache_env$token <- get_new_token()
+        }
+        cache_env$token
       }
 
-      if (!exists("token", envir=cache_env) || Sys.time() >= exp_time) {
-        cache_env$token <- get_new_token()
-      }
-
-
-
-
-
-
-      # fetch or refresh token
-      if (!exists("token", envir = cache_env) ||
-          is.null(cache_env$token) ||
-          is.null(cache_env$token$credentials$expires_on) ||
-          Sys.time() >= as.POSIXct(cache_env$token$credentials$expires_on,
-                                   origin = "1970-01-01", tz = "UTC")) {
-        cache_env$token <- get_new_token()
-      }
-      tok <- cache_env$token$credentials
+      tok <- ensure_token()$credentials
       headers <- c(
         Authorization = paste(tok$token_type, tok$access_token),
         `User-Agent`  = "idata-script-client"

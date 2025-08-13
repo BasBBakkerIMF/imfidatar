@@ -7,11 +7,11 @@ idata <- imf.bookr::idata
 
 
 # Read all datasets into environment
-myds <- imf.bookr::idata$metadata$make_dataset_env(needs_auth = T)
+myds <- imf.bookr::idata$metadata$gemake_dataset_env(needs_auth = T)
 
 
 
-df<-imf.bookr::idata$metadata$imfdata_show_datasets(needs_auth = T)
+df<-imf.bookr::idata$metadata$imfdata_show_datasets(needs_auth = F)
 
 mydims <- idata$metadata$get_dimension_names(myds$`National Economic Accounts (NEA), Annual Data`)
 mydims
