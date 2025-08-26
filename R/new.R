@@ -2,7 +2,63 @@ library(rsdmx)
 library(XML)   # for XML fallback
 
 # Reuse your existing DSD fetcher
+
 .fetch_dsd <- function(flow_id, providerId = "IMF_DATA") {
+  # ensure cache env exists
+  if (!exists(".dsdcache", envir = .GlobalEnv)) {
+    assign(".dsdcache", new.env(parent = emptyenv()), envir = .GlobalEnv)
+  }
+  cache <- get(".dsdcache", envir = .GlobalEnv)
+
+  key1 <- paste0("DSD_", flow_id)
+
+  # 1) cache hit for "DSD_<flow_id>"
+  if (exists(key1, envir = cache, inherits = FALSE)) {
+    return(get(key1, envir = cache, inherits = FALSE))
+  }
+
+  # 2) try direct fetch of "DSD_<flow_id>"
+  try1 <- try(
+    rsdmx::readSDMX(
+      providerId  = providerId,
+      resource    = "datastructure",
+      resourceId  = key1,
+      references  = "all"
+    ),
+    silent = TRUE
+  )
+  if (!inherits(try1, "try-error")) {
+    assign(key1, try1, envir = cache)
+    return(try1)
+  }
+
+  # 3) resolve dsdRef via dataflow, then try cache and fetch
+  df_msg <- rsdmx::readSDMX(providerId = providerId, resource = "dataflow")
+  flows  <- slot(slot(df_msg, "dataflows"), "dataflows")
+  hit    <- Filter(function(f) identical(slot(f, "id"), flow_id), flows)
+  if (!length(hit)) stop("Dataflow not found: ", flow_id)
+  dsd_id <- slot(hit[[1]], "dsdRef")
+
+  # check cache for resolved dsd_id
+  if (exists(dsd_id, envir = cache, inherits = FALSE)) {
+    return(get(dsd_id, envir = cache, inherits = FALSE))
+  }
+
+  # fetch and cache under both keys
+  dsd <- rsdmx::readSDMX(
+    providerId  = providerId,
+    resource    = "datastructure",
+    resourceId  = dsd_id,
+    references  = "all"
+  )
+  assign(dsd_id, dsd, envir = cache)
+  assign(key1,  dsd, envir = cache)
+  dsd
+}
+
+
+
+.fetch_dsd_old <- function(flow_id, providerId = "IMF_DATA") {
   try1 <- try(
     readSDMX(providerId = providerId, resource = "datastructure",
              resourceId = paste0("DSD_", flow_id), references = "all"),
@@ -114,3 +170,8 @@ get_dimension_codelists("CPI", providerId = "IMF_DATA")
 
 
 get_dimension_values("CPI", "TYPE_OF_TRANSFORMATION", providerId = "IMF_DATA")
+
+get_dimension_values("CPI", "FREQ", providerId = "IMF_DATA")
+
+
+
