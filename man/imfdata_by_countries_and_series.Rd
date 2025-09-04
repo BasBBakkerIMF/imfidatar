@@ -25,8 +25,6 @@ imfdata_by_countries_and_series(
 \item{needs_auth}{Logical: include authentication header?}
 
 \item{needs_labels}{Logical: include labels in output?}
-
-\item{department}{IMF department code (e.g., "BOP")}
 }
 \value{
 A cleaned data.frame

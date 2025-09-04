@@ -4,7 +4,7 @@
 \alias{get_dimension_names}
 \title{Get dimension names from a DSD or IMF dataflow string}
 \usage{
-get_dimension_names(dataset_or_db)
+get_dimension_names(dataset_or_db, needs_auth = F)
 }
 \arguments{
 \item{dataset_or_db}{Character(1). Either an IMF dataset identifier

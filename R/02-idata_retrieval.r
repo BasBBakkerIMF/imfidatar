@@ -52,11 +52,11 @@ imfdata_by_key <- local({
     # if (!freq %in% c("M", "Q", "A","D")) stop("Invalid frequency: use 'M', 'Q', or 'A'")
     #
     # 5) Process TIME_PERIOD
-    if ("TIME_PERIOD" %in% names(df)) {
-      df <- processTimePeriod(df)
-    } else {
-      warning("TIME_PERIOD missing: skipping period processing")
-    }
+    #if ("TIME_PERIOD" %in% names(df)) {
+    #  df <- processTimePeriod(df)
+    #} else {
+    #  warning("TIME_PERIOD missing: skipping period processing")
+    #}
 
     # 6) Coerce and clean up
     if (!"OBS_VALUE" %in% names(df)) {
@@ -199,3 +199,104 @@ processTimePeriod <- function(dataset) {
   # }
   dataset
 }
+
+#' Convert period strings to end-of-period Dates
+#'
+#' Converts character period labels at daily, monthly, quarterly, or annual
+#' frequencies into the corresponding end-of-period `Date`.
+#'
+#' @param period Character vector of period labels.
+#' @param frequency Character vector of frequencies; one of \code{"D"}, \code{"M"},
+#'   \code{"Q"}, or \code{"A"} (case-insensitive). If length 1, it is recycled to
+#'   match \code{period}.
+#'
+#' @details
+#' Accepted \code{period} formats by \code{frequency}:
+#' \itemize{
+#'   \item \strong{D} (daily): \code{"YYYY-MM-DD"} (e.g., \code{"2024-02-29"}). Returned date is the same day.
+#'   \item \strong{M} (monthly): \code{"YYYY-Mnn"} with \code{nn} in \code{"01"}–\code{"12"}
+#'         (e.g., \code{"2024-M01"}). Returns the last calendar day of that month.
+#'   \item \strong{Q} (quarterly): \code{"YYYY-Qn"} with \code{n} in \code{1}–\code{4}
+#'         (e.g., \code{"2024-Q3"}). Returns the last calendar day of the quarter.
+#'   \item \strong{A} (annual): \code{"YYYY"} (e.g., \code{"2024"}). Returns \code{"YYYY-12-31"}.
+#' }
+#'
+#' Inputs are trimmed and uppercased internally. Unsupported frequencies or
+#' malformed/empty period strings yield \code{NA}. The function is vectorized
+#' over \code{period} and \code{frequency}; if \code{frequency} has length 1 it
+#' is recycled. For \code{D}, dates must be ISO \code{"YYYY-MM-DD"}; no other daily
+#' formats are parsed.
+#'
+#' @return A `Date` vector of the same length as \code{period}, with \code{NA} for
+#'   invalid inputs.
+#'
+#' @examples
+#' string_to_date_by_freq(c("2024-01-31","2024-02-29"), "D")
+#' string_to_date_by_freq(c("2024-M01","2024-M02"), "M")
+#' string_to_date_by_freq(c("2024-Q1","2024-Q2"), "Q")
+#' string_to_date_by_freq(c("2023","2024"), "A")
+#'
+#' # Mixed frequencies (vectorized):
+#' string_to_date_by_freq(c("2024-Q4","2025"), c("Q","A"))
+#'
+#' # Invalid formats return NA:
+#' string_to_date_by_freq(c("2024-13-01",""), "D")
+#'
+#' @importFrom lubridate ymd ceiling_date days
+#' @export
+string_to_date_by_freq <- function(period, frequency) {
+  if (!is.character(period)) stop("`period` must be a character vector.")
+  if (length(frequency) == 1L) frequency <- rep(frequency, length(period))
+  if (length(period) != length(frequency)) {
+    stop("`period` and `frequency` must have the same length (or frequency length 1).")
+  }
+
+  frequency <- toupper(as.character(frequency))
+  out <- vapply(seq_along(period), function(i) {
+    s <- toupper(trimws(period[i]))
+    f <- frequency[i]
+
+    # Only convert D/M/Q/A; anything else => NA
+    if (!f %in% c("D","M","Q","A") || is.na(s) || s == "") return(as.Date(NA))
+
+    if (f == "D") {
+      if (grepl("^\\d{4}-\\d{2}-\\d{2}$", s)) {
+        return(as.Date(lubridate::ymd(s)))
+      } else return(as.Date(NA))
+    }
+
+    if (f == "A") {
+      if (grepl("^\\d{4}$", s)) {
+        y <- as.integer(s)
+        return(as.Date(sprintf("%04d-12-31", y)))
+      } else return(as.Date(NA))
+    }
+
+    if (f == "Q") {
+      m <- regexec("^(\\d{4})-Q([1-4])$", s); g <- regmatches(s, m)[[1]]
+      if (length(g)) {
+        y <- as.integer(g[2]); q <- as.integer(g[3]); last_month <- q * 3
+        d <- lubridate::ceiling_date(
+          lubridate::ymd(sprintf("%04d-%02d-01", y, last_month)), "month"
+        ) - lubridate::days(1)
+        return(as.Date(d))
+      } else return(as.Date(NA))
+    }
+
+    if (f == "M") {
+      m <- regexec("^(\\d{4})-M(0[1-9]|1[0-2])$", s); g <- regmatches(s, m)[[1]]
+      if (length(g)) {
+        y <- as.integer(g[2]); mm <- as.integer(g[3])
+        d <- lubridate::ceiling_date(
+          lubridate::ymd(sprintf("%04d-%02d-01", y, mm)), "month"
+        ) - lubridate::days(1)
+        return(as.Date(d))
+      } else return(as.Date(NA))
+    }
+
+    as.Date(NA)
+  }, FUN.VALUE = as.Date(NA))
+
+  out
+}
+
