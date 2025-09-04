@@ -21,17 +21,26 @@ NULL
 #' @return An object of class `SDMX` representing the DSD.
 #' @importFrom rsdmx readSDMX
 #' @noRd
-.get_raw_dsd <- function(dataset) {
+.get_raw_dsd <- function(dataset,needs_auth=F) {
   if (!exists(".dsdcache", envir = .GlobalEnv)) {
     assign(".dsdcache", new.env(parent = emptyenv()), envir = .GlobalEnv)
   }
   if (exists(dataset, envir = .dsdcache, inherits = FALSE)) {
     return(get(dataset, envir = .dsdcache, inherits = FALSE))
   }
+
+  # --- added: build and pass HTTP headers ---
+  sdmx_headers <- as.list(c(
+    .get_imf_headers(needs_auth = needs_auth),
+    Accept = "application/vnd.sdmx.structure+xml;version=2.1"
+  ))
+  # ------------------------------------------
+
   dsd <- rsdmx::readSDMX(
     providerId = "IMF_DATA",
     resource   = "datastructure",
-    resourceId = dataset
+    resourceId = dataset,
+    headers    = .get_imf_headers()
   )
   assign(dataset, dsd, envir = .dsdcache)
   dsd
@@ -45,7 +54,7 @@ NULL
 #' @importFrom methods slot
 #' @importFrom stringr str_split
 
-get_dimension_names <- function(dataset_or_db) {
+get_dimension_names <- function(dataset_or_db,needs_auth=F) {
   # If the input contains a ":", treat it as a dataflow and extract the code part
   if (grepl(":", dataset_or_db)) {
     parts  <- stringr::str_split(dataset_or_db, ":", simplify = TRUE)
@@ -57,7 +66,7 @@ get_dimension_names <- function(dataset_or_db) {
 
   #print(dsd_id)
   # Fetch (or cached) the raw DSD
-  dsd <- .get_raw_dsd(dsd_id)
+  dsd <- .get_raw_dsd(dsd_id,needs_auth = needs_auth)
 
   # Extract the dimensions
   ds   <- slot(dsd, "datastructures")@datastructures[[1]]
@@ -160,5 +169,3 @@ make_dimension_env <- function(dataset_or_db, dimension) {
   list2env(vals, envir = env)
   env
 }
-
-
