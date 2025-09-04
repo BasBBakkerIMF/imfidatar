@@ -18,6 +18,7 @@ idata <- list(
     make_dataset_env = make_dataset_env
   ),
   utils = list(
-    make_key_str = make_key_str
+    make_key_str = make_key_str,
+    string_to_date_by_freq = string_to_date_by_freq
   )
 )

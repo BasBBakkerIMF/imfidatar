@@ -4,7 +4,7 @@
 \alias{make_dataset_env}
 \title{Build an environment mapping Name.en -> "agencyID:id" (alphabetical)}
 \usage{
-make_dataset_env(needs_auth = F)
+make_dataset_env(needs_auth = FALSE)
 }
 \arguments{
 \item{df}{A data.frame with at least columns \code{id}, \code{agencyID}, and \code{Name.en}}
