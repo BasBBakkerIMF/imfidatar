@@ -1,0 +1,251 @@
+---
+title: "README.qmd"
+format: html
+editor: visual
+execute:
+  echo: true       # show code by default (adjust as you like)
+  warning: true
+  message: true
+  error: true    
+---
+
+## imfidatar
+
+`imfidatar` makes it easy to access imf data (from `data.imf.org`) in R. It helps you build the key, find the available variables and stores your login credentials on your computer so you do not need to login every time.
+
+## Installing
+
+On most computers you should be able to install `imfidatar` with
+
+```{r,eval=FALSE}
+library(remotes )
+remotes::install_git('https://github.com/BasBBakkerIMF/imfidatar.git')
+
+```
+
+On IMF computers that does not work. Instead do the below:
+
+```{r, eval=FALSE}
+#
+url <- "https://codeload.github.com/BasBBakkerIMF/imfidatar/tar.gz/HEAD"
+tf  <- tempfile(fileext = ".tar.gz")
+
+curl::curl_download(url, tf)        # fetch with curl
+remotes::install_local(tf)          # install from the downloaded file
+
+
+
+```
+
+After you have installed it, you need to load it:
+
+```{r}
+library(imfidatar)
+```
+
+## Publicly accessible datasets:
+
+To show the publicly available datasets:
+
+```{r}
+datasets=idata$metadata$imfdata_show_datasets()
+
+head(datasets)
+```
+
+Some datasets are not publicly available. To see all datasets (including non-public datasets) use:
+
+```{r}
+datasets=idata$metadata$imfdata_show_datasets(needs_auth = TRUE)
+
+
+```
+
+You will be asked to sign in.
+
+![](images/clipboard-2495613012.png)
+
+After you have been authenticated, you can see the available datasets:
+
+```{r}
+
+head(datasets)
+```
+
+## Querying data
+
+To query data you need to know both the dataset and a key. For the dataset you use the **agencyID** column in the dataset table. We will explain later how to build the key. For now, understand that for two **countries** (NLD and USA) we asked data for two **indicators** unemployment (LUR) and the CPI (PCPI), with annual **frequency**.
+
+```{r}
+library(dplyr)
+weodata=idata$retrieval$imfdata_by_key(dataset = "IMF.RES:WEO", 
+                                       key = "USA+NLD.LUR+PCPI.A")
+weodata %>% select(COUNTRY,INDICATOR,TIME_PERIOD,value) %>% tail()
+
+```
+
+## Building the key
+
+To build the key, you first need to find the **dimensions.**
+
+```{r}
+dims=idata$metadata$get_dimension_names("IMF.RES:WEO") 
+dims
+```
+
+There are three dimension names, and in the key you need to put them in that order.
+
+## Dimension values
+
+```{r}
+
+countries=idata$metadata$make_dimension_env("IMF.RES:WEO", "COUNTRY")
+```
+
+Now if type in `countries$` a dropdown menu will show up.
+
+![](images/clipboard-4154938580.png)
+
+If you choose `United States` you will see that the code for this country is `USA`.
+
+```{r}
+
+countries$`United States`
+```
+
+We make similar dropdown for the other variables:
+
+```{r}
+
+indicators=idata$metadata$make_dimension_env(dataset_or_db = "IMF.RES:WEO",dimension = "INDICATOR")
+frequencies=idata$metadata$make_dimension_env(dataset_or_db ="IMF.RES:WEO","FREQ")
+
+
+```
+
+## Building the key.
+
+We can now build the key. For each dimension, we choose the relevant varaibles.
+
+```{r}
+
+mycountries = list(countries$`Netherlands, The`,countries$`United States`)
+mycountries
+
+```
+
+```{r}
+
+myindicators=list(indicators$`Unemployment rate`,indicators$`Gross domestic product (GDP), Constant prices, Domestic currency`)
+myindicators
+
+```
+
+```{r}
+
+myfrequencies=list(frequencies$Annual)
+myfrequencies
+
+```
+
+Finally we combine this in a key:
+
+```{r}
+
+mykey=list(mycountries,myindicators,myfrequencies)
+
+
+```
+
+To see the key, We can make a string from it:
+
+```{r}
+
+mykeystr=idata$utils$make_key_str(mykey)
+mykeystr
+```
+
+```{r}
+weo_data=idata$retrieval$imfdata_by_key(dataset = "IMF.RES:WEO",key=mykey)
+weo_data %>% select(COUNTRY,INDICATOR,TIME_PERIOD,value) %>% tail()
+```
+
+For WEO data, it is easy to build the key by hand, but for some other datasets it is less straightforward.
+
+## Accessing Restricted Data
+
+To access restricted data you need to `needs_auth=T` to the `imfdata_by_key`function. We will give an example using Bloomberg data.
+
+To prevent any typos, we create a dropdown menu of datasets:
+
+```{r}
+mydatasets=idata$metadata$make_dataset_env(needs_auth = T)
+
+```
+
+In the dropdown menu we quickly find the `Bloomberg Data License`:
+
+```{r}
+bloomberg=mydatasets$`Bloomberg Data License `
+bloomberg
+```
+
+We next check what the dimensions are:
+
+```{r}
+dims=idata$metadata$get_dimension_names(mydatasets$`Bloomberg Data License `)
+dims
+
+```
+
+For each of the dimensions, we build a dropdown list
+
+```{r}
+tickers=idata$metadata$make_dimension_env(dataset_or_db = bloomberg,dimension = "TICKER")
+fields=idata$metadata$make_dimension_env(dataset_or_db = bloomberg,dimension = "MARKET_FIELD")
+freqs=idata$metadata$make_dimension_env(dataset_or_db = bloomberg,dimension = "FREQ")
+```
+
+We build the key
+
+```{r}
+bb_key = list(
+     c(tickers$`ALBANIAN LEK SPOT`),
+   c(fields$`Ask Price`, fields$`Bid Price`),
+   c(freqs$Daily)
+ )
+
+```
+
+```{r}
+bb_data=idata$retrieval$imfdata_by_key(dataset = bloomberg,needs_auth = T,key=bb_key,needs_labels = F)
+tail(bb_data)
+```
+
+## Labels
+
+In many datasets indicator names are pretty easy to understand. In some datasets they are much more obscure. For example, in the `BOP` database, `SL` is the indicator name for `Government goods and services n.i.e.`
+
+In such a case, you also download labels with the data.
+
+```{r results="hide", message=FALSE, warning=FALSE, error=TRUE}
+library(dplyr)
+keystr <- "CRI+HND+GTM+NIC+PAN+DOM+SLV.CD_T.S+SA+SB+SC+SD+SE+SF+SG+SH+SI+SJ+SK+SL.USD.A"
+
+df <- idata$retrieval$imfdata_by_key(
+  dataset = "IMF.STA:BOP",
+  needs_auth = FALSE,
+  key = keystr,
+  needs_labels = TRUE
+)
+```
+
+Finally we show the data:
+
+```{r}
+df2 <- df %>% select(COUNTRY, INDICATOR, INDICATOR_label.en.label, TIME_PERIOD, value)
+tail(df2)
+```
+
+
+
