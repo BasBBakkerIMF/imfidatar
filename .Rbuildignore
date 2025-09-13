@@ -1,3 +1,11 @@
-^imf\.bookr\.Rproj$
-^\.Rproj\.user$
-^LICENSE\.md$
+^.*\.Rproj$          # any .Rproj file
+^\.Rproj\.user$      # RStudio user state dir
+^\.Rhistory$         # history file
+^\.RData$            # workspace
+^\.Renviron$         # local environment vars
+^\.httr-oauth$       # auth tokens
+^codelists$          # your generated CSV folder
+^data-raw$           # raw data prep scripts (if you have this folder)
+^docs$               # pkgdown/site output (if generated)
+^pkgdown$            # pkgdown cache
+^revdep$             # reverse-dependency checks
