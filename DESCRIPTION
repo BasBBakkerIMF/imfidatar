@@ -1,6 +1,6 @@
 Package: imfidatar
 Title: Fetches IMF iData
-Version: 0.0.2.4
+Version: 0.0.2.2
 Authors@R: 
     person("Bas", "Bakker", , "bbakker@Imf.org", role = c("aut", "cre"))
 Description: Access IMF iData in R.
@@ -8,8 +8,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-URL: https://github.com/BasBBakkerIMF/imfidatar
-BugReports: https://github.com/BasBBakkerIMF/imfidatar/issues
+URL: https://github.com/BasBBakkerIMF/imfidata
+BugReports: https://github.com/BasBBakkerIMF/imfidata/issues
 Imports:
     methods,
     AzureAuth,
