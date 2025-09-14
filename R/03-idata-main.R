@@ -14,8 +14,12 @@ idata <- list(
   metadata = list(
     imfdata_show_datasets = imfdata_show_datasets,
     get_dimension_names = get_dimension_names,
+    get_dimension_values=get_dimension_values,
     make_dimension_env = make_dimension_env,
-    make_dataset_env = make_dataset_env
+    make_dataset_env = make_dataset_env,
+    get_codelist_names=get_codelist_names,
+    get_codelist_values_by_id=get_codelist_values_by_id
+
   ),
   utils = list(
     make_key_str = make_key_str,

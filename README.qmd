@@ -246,6 +246,3 @@ Finally we show the data:
 df2 <- df %>% select(COUNTRY, INDICATOR, INDICATOR_label.en.label, TIME_PERIOD, value)
 tail(df2)
 ```
-
-
-
