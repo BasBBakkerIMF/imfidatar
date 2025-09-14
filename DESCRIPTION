@@ -1,6 +1,6 @@
 Package: imfidatar
 Title: Fetches IMF iData
-Version: 0.0.2.2
+Version: 0.0.2.5
 Authors@R: 
     person("Bas", "Bakker", , "bbakker@Imf.org", role = c("aut", "cre"))
 Description: Access IMF iData in R.
