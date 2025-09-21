@@ -8,6 +8,25 @@ It helps you build the key, find the available variables and stores your
 login credentials on your computer so you do not need to login every
 time.
 
+## Pre-requisites
+
+You first need to the install the rsdmx package. You cannot install it
+the usual way. You need to install the latest version from Github.
+Before you can install it, you first need to load (or install) the
+devtools package.
+
+``` r
+#install.packages("devtools")
+library(devtools)
+```
+
+You then can install the rsdmx package from Github. Please note the
+force=TRUE argument, which helps prevent installation problems.
+
+``` r
+install_github("opensdmx/rsdmx", force = TRUE)
+```
+
 ## Installing
 
 On most computers you should be able to install `imfidatar` with
@@ -17,7 +36,7 @@ library(remotes )
 remotes::install_git('https://github.com/BasBBakkerIMF/imfidatar.git')
 ```
 
-On IMF computers that does not work. Instead do the below:
+On some IMF computers that does not work. In that case do the below:
 
 ``` r
 #
@@ -47,33 +66,33 @@ head(datasets)
 ```
 
            id agencyID
-    1  AFRREO  IMF.AFR
-    2     HPD  IMF.FAD
-    3      PI  IMF.STA
-    4  APDREO  IMF.APD
-    5 MFS_ODC  IMF.STA
-    6     DIP  IMF.STA
-                                                                     Name.en
-    1                  Sub-Saharan Africa Regional Economic Outlook (AFRREO)
-    2                                           Historical Public Debt (HPD)
-    3                                                Production Indexes (PI)
-    4                    Asia and Pacific Regional Economic Outlook (APDREO)
-    5 Monetary and Financial Statistics (MFS), Other Depository Corporations
-    6     Direct Investment Positions by Counterpart Economy (formerly CDIS)
+    1     PIP  IMF.STA
+    2  APDREO  IMF.APD
+    3 BOP_AGG  IMF.STA
+    4  MFS_FC  IMF.STA
+    5     SDG  IMF.STA
+    6  TAXFIT  IMF.RES
+                                                                                                                 Name.en
+    1                                              Portfolio Investment Positions by Counterpart Economy (formerly CPIS)
+    2                                                                Asia and Pacific Regional Economic Outlook (APDREO)
+    3 Balance of Payments and International Investment Position Statistics (BOP/IIP), World and Country Group Aggregates
+    4                                                    Monetary and Financial Statistics (MFS), Financial Corporations
+    5                                                                                              IMF Reported SDG Data
+    6                                                                            Tax and Benefits Analysis Tool (TAXFIT)
       version  uri
-    1   6.0.1 <NA>
-    2   1.0.0 <NA>
-    3   2.0.0 <NA>
-    4   6.0.0 <NA>
-    5   9.0.1 <NA>
-    6  12.0.0 <NA>
+    1   4.0.0 <NA>
+    2   6.0.0 <NA>
+    3   9.0.1 <NA>
+    4   7.0.1 <NA>
+    5   2.0.1 <NA>
+    6   2.0.3 <NA>
                                                                             urn
-    1  urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.AFR:AFRREO(6.0.1)
-    2     urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.FAD:HPD(1.0.0)
-    3      urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:PI(2.0.0)
-    4  urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.APD:APDREO(6.0.0)
-    5 urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:MFS_ODC(9.0.1)
-    6    urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:DIP(12.0.0)
+    1     urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:PIP(4.0.0)
+    2  urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.APD:APDREO(6.0.0)
+    3 urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:BOP_AGG(9.0.1)
+    4  urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:MFS_FC(7.0.1)
+    5     urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:SDG(2.0.1)
+    6  urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.RES:TAXFIT(2.0.3)
       isExternalReference isFinal validFrom validTo dsdRef Name.fr Name.ar Name.es
     1               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
     2               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
@@ -110,48 +129,41 @@ After you have been authenticated, you can see the available datasets:
 head(datasets)
 ```
 
-                                        id    agencyID
-    1                                  TEG     IMF.STA
-    2           DF_EIP_WPLF_SEX_AGE_MTS_NB         ILO
-    3 WEO_LIVE_2020_JAN_ICP2017PPP_VINTAGE IMF.RES.WEO
-    4                                 ICSD     IMF.FAD
-    5                                  EER     IMF.STA
-    6                             GAS_LIVE IMF.RES.GAS
-                                                    Name.en version  uri
-    1                 Trade in Energy Efficient Goods (TEG)   3.0.1 <NA>
-    2 Potential labour force by sex, age and marital status     1.0 <NA>
-    3            WEO Live 2020 January (ICP2017PPP Weights)   1.0.0 <NA>
-    4           Investment and Capital Stock Dataset (ICSD)   1.0.0 <NA>
-    5                         Effective Exchange Rate (EER)   6.0.0 <NA>
-    6                         Global Assumptions (GAS) Live   3.0.0 <NA>
-                                                                                                             urn
-    1                                      urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:TEG(3.0.1)
-    2                     urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=ILO:DF_EIP_WPLF_SEX_AGE_MTS_NB(1.0)
-    3 urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.RES.WEO:WEO_LIVE_2020_JAN_ICP2017PPP_VINTAGE(1.0.0)
-    4                                     urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.FAD:ICSD(1.0.0)
-    5                                      urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:EER(6.0.0)
-    6                             urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.RES.GAS:GAS_LIVE(3.0.0)
-      isExternalReference isFinal validFrom validTo dsdRef
-    1               FALSE    TRUE      <NA>    <NA>   <NA>
-    2               FALSE    TRUE      <NA>    <NA>   <NA>
-    3               FALSE    TRUE      <NA>    <NA>   <NA>
-    4               FALSE    TRUE      <NA>    <NA>   <NA>
-    5               FALSE    TRUE      <NA>    <NA>   <NA>
-    6               FALSE    TRUE      <NA>    <NA>   <NA>
-                                                          Name.fr
-    1                                                        <NA>
-    2 Main-d'oeuvre potentielle par sexe, éducation et état civil
-    3                                                        <NA>
-    4                                                        <NA>
-    5                                                        <NA>
-    6                                                        <NA>
-                                                               Name.es Name.ar
-    1                                                             <NA>    <NA>
-    2 Fuerza de trabajo potencial según sexo, educación y estado civil    <NA>
-    3                                                             <NA>    <NA>
-    4                                                             <NA>    <NA>
-    5                                                             <NA>    <NA>
-    6                                                             <NA>    <NA>
+                             id    agencyID
+    1                EER_INPUTS     IMF.STA
+    2                      FSIC     IMF.STA
+    3                  MFS_NSRF     IMF.STA
+    4 WEO_LIVE_2021_OCT_VINTAGE IMF.RES.WEO
+    5                    MFS_MA     IMF.STA
+    6                      QNEA     IMF.STA
+                                                                   Name.en version
+    1                                Effective Exchange Rate (EER), Inputs   1.0.0
+    2 Financial Soundness Indicators (FSI), Core and Additional Indicators  13.0.1
+    3          Monetary and Financial Statistics (MFS),  Non-Standard Data   1.0.3
+    4                                                WEO Live 2021 October   1.0.0
+    5         Monetary and Financial Statistics (MFS), Monetary Aggregates  10.0.1
+    6                     National Economic Accounts (NEA), Quarterly Data   7.0.0
+       uri
+    1 <NA>
+    2 <NA>
+    3 <NA>
+    4 <NA>
+    5 <NA>
+    6 <NA>
+                                                                                                  urn
+    1                    urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:EER_INPUTS(1.0.0)
+    2                         urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:FSIC(13.0.1)
+    3                      urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:MFS_NSRF(1.0.3)
+    4 urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.RES.WEO:WEO_LIVE_2021_OCT_VINTAGE(1.0.0)
+    5                       urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:MFS_MA(10.0.1)
+    6                          urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=IMF.STA:QNEA(7.0.0)
+      isExternalReference isFinal validFrom validTo dsdRef Name.fr Name.es Name.ar
+    1               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
+    2               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
+    3               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
+    4               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
+    5               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
+    6               FALSE    TRUE      <NA>    <NA>   <NA>    <NA>    <NA>    <NA>
       Name.pt Name.ja Name.zh Name.ru
     1    <NA>    <NA>    <NA>    <NA>
     2    <NA>    <NA>    <NA>    <NA>
@@ -395,12 +407,12 @@ tail(bb_data)
 ```
 
               TICKER  FIELD FREQUENCY SCALE TIME_PERIOD OBS_VALUE value
-    14306 ALL_CURNCY PX_BID         D     0  2025-08-29     83.41 83.41
-    14307 ALL_CURNCY PX_BID         D     0  2025-09-01     83.24 83.24
-    14308 ALL_CURNCY PX_BID         D     0  2025-09-02     83.63 83.63
-    14309 ALL_CURNCY PX_BID         D     0  2025-09-03     83.18 83.18
-    14310 ALL_CURNCY PX_BID         D     0  2025-09-04     83.04 83.04
-    14311 ALL_CURNCY PX_BID         D     0  2025-09-05     82.62 82.62
+    14324 ALL_CURNCY PX_BID         D     0  2025-09-11      82.4 82.40
+    14325 ALL_CURNCY PX_BID         D     0  2025-09-12     82.13 82.13
+    14326 ALL_CURNCY PX_BID         D     0  2025-09-15     82.06 82.06
+    14327 ALL_CURNCY PX_BID         D     0  2025-09-16     81.27 81.27
+    14328 ALL_CURNCY PX_BID         D     0  2025-09-17     81.43 81.43
+    14329 ALL_CURNCY PX_BID         D     0  2025-09-18     81.43 81.43
 
 ## Labels
 

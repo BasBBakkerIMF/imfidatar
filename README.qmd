@@ -13,6 +13,21 @@ execute:
 
 `imfidatar` makes it easy to access imf data (from `data.imf.org`) in R. It helps you build the key, find the available variables and stores your login credentials on your computer so you do not need to login every time.
 
+## Pre-requisites
+
+You first need to the install the rsdmx package. You cannot install it the usual way. You need to install the latest version from Github. Before you can install it, you first need to load (or install) the devtools package.
+
+```{r,eval=FALSE}
+#install.packages("devtools")
+library(devtools)
+```
+
+You then can install the rsdmx package from Github. Please note the force=TRUE argument, which helps prevent installation problems.
+
+```{r,eval=FALSE}
+install_github("opensdmx/rsdmx", force = TRUE)
+```
+
 ## Installing
 
 On most computers you should be able to install `imfidatar` with
@@ -23,7 +38,7 @@ remotes::install_git('https://github.com/BasBBakkerIMF/imfidatar.git')
 
 ```
 
-On IMF computers that does not work. Instead do the below:
+On some IMF computers that does not work. In that case do the below:
 
 ```{r, eval=FALSE}
 #
